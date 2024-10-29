@@ -3,27 +3,33 @@ import { config } from "./config";
 import bodyParser from "body-parser";
 
 import cookieSession from "cookie-session";
-import { ErrorPayload, ErrorTypes, InternalServerError, NotFoundError } from "./errors";
+import { NotFoundError } from "./errors";
 import { SignInRouter } from "./features/auth/sign-in/route";
+import { errorMiddleware } from "./middlewares/error";
+import { notfoundMiddleware } from "./middlewares/not-found";
 
 const app = express();
 
 app.use(bodyParser.json());
 
+app.use(
+  cookieSession({
+    keys: ["token"],
+    httpOnly: true,
+    secure: config.PROD ? true : false,
+  })
+);
+
+// health check
+app.get("/", (req: Request, res: Response) => {
+  res.status(200).send("HI");
+});
+//
+
 app.use("/api", SignInRouter);
 
-app.use("/*", (req: Request, res: Response, next: NextFunction) => {
-  next(NotFoundError());
-});
+app.use("/*", notfoundMiddleware);
 
-app.use((error: ErrorPayload, req: Request, res: Response, next: NextFunction) => {
-  if (error?.type in ErrorTypes) {
-    res.status(error.statusCode).send(error.errors);
-  } else {
-    console.log("error ", error);
-    const err = InternalServerError();
-    res.status(err.statusCode).send(err.errors);
-  }
-});
+app.use(errorMiddleware);
 
 app.listen(config.PORT, () => console.log("Listen on port 4000"));
