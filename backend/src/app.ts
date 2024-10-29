@@ -7,6 +7,7 @@ import cookieSession from "cookie-session";
 import { errorMiddleware } from "./middlewares/errors";
 import { notfoundMiddleware } from "./middlewares/errors/not-found";
 import { authRoutes } from "./features/auth";
+import { pgClient } from "./database/init";
 
 const app = express();
 
@@ -32,4 +33,14 @@ app.use("/*", notfoundMiddleware);
 
 app.use(errorMiddleware);
 
-app.listen(config.PORT, () => console.log("Listen on port 4000"));
+const startUp = async () => {
+  try {
+    await pgClient.connect();
+    console.log("Listen on port 4000");
+  } catch (err) {
+    console.log("Database connection error ", err);
+    process.exit(0);
+  }
+};
+
+app.listen(config.PORT, startUp);

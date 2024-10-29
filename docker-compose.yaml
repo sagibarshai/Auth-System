@@ -14,6 +14,6 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: domains
+      POSTGRES_DB: MeetAround
     ports:
       - "5432:5432"
