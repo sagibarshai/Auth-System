@@ -5,8 +5,8 @@ import bodyParser from "body-parser";
 import cookieSession from "cookie-session";
 import { NotFoundError } from "./errors";
 import { SignInRouter } from "./features/auth/sign-in/route";
-import { errorMiddleware } from "./middlewares/error";
-import { notfoundMiddleware } from "./middlewares/not-found";
+import { errorMiddleware } from "./middlewares/errors/error";
+import { notfoundMiddleware } from "./middlewares/errors/not-found";
 
 const app = express();
 
