@@ -1,12 +1,12 @@
-import express, { NextFunction, Request, request, Response, response } from "express";
+import express, { Request, Response } from "express";
 import { config } from "./config";
 import bodyParser from "body-parser";
 
 import cookieSession from "cookie-session";
-import { NotFoundError } from "./errors";
-import { SignInRouter } from "./features/auth/sign-in/route";
+
 import { errorMiddleware } from "./middlewares/errors";
 import { notfoundMiddleware } from "./middlewares/errors/not-found";
+import { authRoutes } from "./features/auth";
 
 const app = express();
 
@@ -26,7 +26,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 //
 
-app.use("/api", SignInRouter);
+app.use("/api", authRoutes);
 
 app.use("/*", notfoundMiddleware);
 

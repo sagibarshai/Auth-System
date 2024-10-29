@@ -6,18 +6,18 @@ export enum ErrorTypes {
   UNAUTHORIZED_ERROR = "UNAUTHORIZED_ERROR",
   INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR",
 }
-export interface CustomErrorMessage {
+export type CustomErrorMessage = {
   message: string;
   field?: string;
-}
+}[];
 
 export interface ErrorPayload {
   statusCode: number;
   type: ErrorTypes;
-  errors: CustomErrorMessage[];
+  errors: CustomErrorMessage;
 }
 
-export const BadRequestError = (payload: ErrorPayload["errors"]): ErrorPayload => {
+export const BadRequestError = (payload: CustomErrorMessage): ErrorPayload => {
   return {
     errors: payload,
     statusCode: 400,
