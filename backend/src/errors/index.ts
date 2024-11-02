@@ -1,5 +1,3 @@
-import { NextFunction, Response } from "express";
-
 export enum ErrorTypes {
   BAD_REQUEST_ERROR = "BAD_REQUEST_ERROR",
   NOT_FOUND_ERROR = "NOT_FOUND_ERROR",

@@ -6,9 +6,6 @@ import { requestValidationMiddleware } from "../../../middlewares/request-valida
 
 const router = Router();
 
-// id ,first_name, last_name, email, password, register_at, update_at,
-// is_verifyd, phone_number
-
 router.post(
   "/signUp",
   body("firstName").isLength({ min: 2, max: 40 }).withMessage("First name should be exist with 2 - 40 characters"),

@@ -7,11 +7,12 @@ export interface StoredUser {
   password: string;
   registerAt: Date;
   updateAt: Date;
+  last_login: Date;
   isVerified: boolean;
   phoneNumber?: string;
 }
 
-export interface NewUserPayload extends Omit<StoredUser, "registerAt" | "updateAt" | "isVerified"> {}
+export interface NewUserPayload extends Omit<StoredUser, "registerAt" | "updateAt" | "isVerified" | "last_login"> {}
 
 export interface SafeUser extends Omit<StoredUser, "password"> {}
 

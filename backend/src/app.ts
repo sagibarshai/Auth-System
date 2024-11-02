@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express, { Request, Response } from "express";
 import { config } from "./config";
 import bodyParser from "body-parser";
