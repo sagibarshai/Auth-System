@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { NewUserPayload, signUpModel } from "./model";
 import { BadRequestError, InternalServerError } from "../../../errors";
-import { toHash, compereHash } from "../../../utils/passwords";
+import { toHash } from "../../../utils/passwords";
+import jwt from "jsonwebtoken";
 
 interface SignUpRequest extends Request {
   body: NewUserPayload;
@@ -9,13 +10,18 @@ interface SignUpRequest extends Request {
 
 export const signUpController = async (req: SignUpRequest, res: Response, next: NextFunction) => {
   try {
-    const hash = toHash(req.body.password);
-    const isEqual = compereHash(hash, req.body.password);
+    const hashedPassword = toHash(req.body.password);
 
-    console.log("isEqual ! ", isEqual);
-    const newUser = await signUpModel(req.body);
+    const newUser = await signUpModel({ ...req.body, password: hashedPassword });
     if (!newUser) next(BadRequestError([{ message: `User with email ${req.body.email} is already exist.`, field: "body" }]));
-    else res.status(201).send(newUser);
+    else {
+      const token = jwt.sign(newUser, process.env.JWT_KEY!, { expiresIn: "1h" });
+      req.session = {
+        token,
+      };
+
+      res.status(201).send(newUser);
+    }
   } catch (err) {
     next(InternalServerError());
   }

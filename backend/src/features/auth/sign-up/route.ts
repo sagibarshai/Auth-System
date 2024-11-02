@@ -3,6 +3,7 @@ import { signUpController } from "./controller";
 import { body } from "express-validator";
 import { formattedPhoneRegex } from "../../../utils/regex/phone-number";
 import { requestValidationMiddleware } from "../../../middlewares/request-validation";
+import { currentUserMiddleware } from "../../../middlewares/current-user.ts";
 
 const router = Router();
 
@@ -22,6 +23,7 @@ router.post(
     .isMobilePhone(["he-IL"], { strictMode: true })
     .withMessage("Phone number must be valid and from Israel"),
   requestValidationMiddleware,
+  currentUserMiddleware,
   signUpController
 );
 

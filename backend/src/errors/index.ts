@@ -38,3 +38,10 @@ export const InternalServerError = (): ErrorPayload => {
     type: ErrorTypes.INTERNAL_SERVER_ERROR,
   };
 };
+export const UnAuthorizedError = (): ErrorPayload => {
+  return {
+    errors: [{ message: "UnAuthorized" }],
+    statusCode: 401,
+    type: ErrorTypes.UNAUTHORIZED_ERROR,
+  };
+};
