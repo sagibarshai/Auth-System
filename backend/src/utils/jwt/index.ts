@@ -2,8 +2,10 @@ import { Request } from "express";
 import { SafeUser } from "../../features/auth/models";
 import jwt from "jsonwebtoken";
 
-export const createToken = (payload: SafeUser): string => {
-  return jwt.sign(payload, process.env.JWT_KEY!, { expiresIn: "1h" });
+export const createTokenAndSetCookie = (payload: SafeUser, req: Request): string => {
+  const token = jwt.sign(payload, process.env.JWT_KEY!, { expiresIn: "1h" });
+  setTokenCookie(req, token);
+  return token;
 };
 
 export const verifyToken = (token: string): SafeUser | undefined => {

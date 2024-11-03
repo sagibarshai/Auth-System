@@ -23,7 +23,7 @@ export const BadRequestError = (payload: CustomErrorMessage): ErrorPayload => {
   };
 };
 
-export const NotFoundError = (): ErrorPayload => {
+export const NotFoundError = (payload?: CustomErrorMessage): ErrorPayload => {
   return {
     errors: [{ message: "Route not found" }],
     statusCode: 404,
@@ -31,14 +31,14 @@ export const NotFoundError = (): ErrorPayload => {
   };
 };
 
-export const InternalServerError = (): ErrorPayload => {
+export const InternalServerError = (payload?: CustomErrorMessage): ErrorPayload => {
   return {
     errors: [{ message: "Internal Server Error" }],
     statusCode: 500,
     type: ErrorTypes.INTERNAL_SERVER_ERROR,
   };
 };
-export const UnAuthorizedError = (): ErrorPayload => {
+export const UnAuthorizedError = (payload?: CustomErrorMessage): ErrorPayload => {
   return {
     errors: [{ message: "UnAuthorized" }],
     statusCode: 401,

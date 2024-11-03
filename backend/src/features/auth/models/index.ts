@@ -1,4 +1,5 @@
 import { pgClient } from "../../../database/init";
+import { handleDbCatchBlock } from "../../../errors/handle-db-catch-block";
 
 export interface StoredUser {
   firstName: string;
@@ -16,7 +17,7 @@ export interface NewUserPayload extends Omit<StoredUser, "registerAt" | "updateA
 
 export interface SafeUser extends Omit<StoredUser, "password"> {}
 
-export const InsertUserModel = async (user: NewUserPayload): Promise<SafeUser | undefined> => {
+export const InsertUserModel = async (user: NewUserPayload): Promise<SafeUser> => {
   try {
     const response = await pgClient.query(
       `INSERT INTO Users 
@@ -27,20 +28,20 @@ export const InsertUserModel = async (user: NewUserPayload): Promise<SafeUser | 
          `,
       [user.firstName, user.lastName, user.email, user.password, user.phoneNumber]
     );
-    if (!response.rows.length) return;
+
     const safeUser = response.rows[0];
     delete safeUser.password;
 
     return safeUser as SafeUser;
   } catch (err) {
-    console.log(`Error ${err} cannot insert ${JSON.stringify(user)} `);
+    return handleDbCatchBlock(err);
   }
 };
 
-export const SelectUserModel = async (identifier: string | number) => {
+export const SelectUserModel = async (identifier: string | number): Promise<SafeUser | undefined> => {
   /** if identifier is number field = id, else field = email*/
   const field = typeof identifier === "number" ? "id" : "email";
-
+  console.log(`filed is ${field} and identifier is ${identifier}`);
   try {
     const response = await pgClient.query(
       `SELECT * FROM Users  
@@ -48,12 +49,13 @@ export const SelectUserModel = async (identifier: string | number) => {
       [identifier]
     );
     if (!response.rows.length) return;
+
     const safeUser = response.rows[0];
     delete safeUser.password;
 
     return safeUser as SafeUser;
   } catch (err) {
-    console.log(`Error ${err} cannot select user with identifier of ${JSON.stringify(identifier)} `);
+    return handleDbCatchBlock(err);
   }
 };
 
@@ -68,13 +70,14 @@ export const SelectUnsafeUserModel = async (identifier: string | number): Promis
       [identifier]
     );
     if (!response.rows.length) return;
+
     return response.rows[0] as StoredUser;
   } catch (err) {
-    console.log(`Error ${err} cannot select user with identifier of ${JSON.stringify(identifier)} `);
+    return handleDbCatchBlock(err);
   }
 };
 
-export const UpdateLastLoginUserModel = async (identifier: string | number): Promise<SafeUser | undefined> => {
+export const UpdateLoginModel = async (identifier: string | number): Promise<SafeUser> => {
   const field = typeof identifier === "number" ? "id" : "email";
 
   try {
@@ -86,11 +89,11 @@ export const UpdateLastLoginUserModel = async (identifier: string | number): Pro
       [new Date(), identifier]
     );
 
-    if (!response.rows.length) return;
+    if (!response.rows.length) throw new Error(`User with ${field} : ${identifier} not found `);
     const safeUser = response.rows[0];
     delete safeUser.password;
     return safeUser as SafeUser;
   } catch (err) {
-    console.log(`Error ${err} cannot update user with identifier of ${JSON.stringify(identifier)} `);
+    return handleDbCatchBlock(err);
   }
 };

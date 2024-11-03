@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import { NewUserPayload, InsertUserModel } from "../models";
-import { BadRequestError, InternalServerError } from "../../../errors";
+import { NewUserPayload, InsertUserModel, SelectUserModel } from "../models";
+import { BadRequestError } from "../../../errors";
 import { toHash } from "../../../utils/passwords";
 import jwt from "jsonwebtoken";
-import { createToken, setTokenCookie } from "../../../utils/jwt";
+import { createTokenAndSetCookie } from "../../../utils/jwt";
 
 interface SignUpRequest extends Request {
   body: NewUserPayload;
@@ -12,15 +12,13 @@ interface SignUpRequest extends Request {
 export const signUpController = async (req: SignUpRequest, res: Response, next: NextFunction) => {
   try {
     const hashedPassword = toHash(req.body.password);
-
+    const isUserExists = await SelectUserModel(req.body.email);
+    if (isUserExists) throw BadRequestError([{ message: `User with email ${req.body.email} already exists`, field: "email" }]);
     const newUser = await InsertUserModel({ ...req.body, password: hashedPassword });
-    if (!newUser) next(BadRequestError([{ message: `User with email ${req.body.email} is already exist.`, field: "body" }]));
-    else {
-      const token = createToken(newUser);
-      setTokenCookie(req, token);
 
-      res.status(201).send(newUser);
-    }
+    createTokenAndSetCookie(newUser, req);
+
+    res.status(201).send(newUser);
   } catch (err) {
     next(err);
   }
