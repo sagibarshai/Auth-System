@@ -38,9 +38,9 @@ export const InternalServerError = (payload?: CustomErrorMessage): ErrorPayload 
     type: ErrorTypes.INTERNAL_SERVER_ERROR,
   };
 };
-export const UnAuthorizedError = (payload?: CustomErrorMessage): ErrorPayload => {
+export const UnauthorizedError = (payload?: CustomErrorMessage): ErrorPayload => {
   return {
-    errors: [{ message: "UnAuthorized" }],
+    errors: [{ message: "Unauthorized" }],
     statusCode: 401,
     type: ErrorTypes.UNAUTHORIZED_ERROR,
   };
