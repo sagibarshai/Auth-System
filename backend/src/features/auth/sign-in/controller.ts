@@ -14,7 +14,7 @@ interface SignUpRequest extends Request {
 export const signInController = async (req: SignUpRequest, res: Response, next: NextFunction) => {
   try {
     const storedUser = await SelectUnsafeUserModel(req.body.email);
-    if (!storedUser) next(BadRequestError([{ message: `User with email ${req.body.email} not found`, field: "email" }]));
+    if (!storedUser) next(BadRequestError([{ message: "Wrong Credentials" }]));
     else {
       const isPasswordsMatch = compereHash(storedUser.password, req.body.password);
       if (!isPasswordsMatch) {

@@ -1,5 +1,4 @@
 import { pgClient } from "../../../database/init";
-import { handleDbCatchBlock } from "../../../errors/handle-db-catch-block";
 
 export interface StoredUser {
   firstName: string;
@@ -34,7 +33,7 @@ export const InsertUserModel = async (user: NewUserPayload): Promise<SafeUser> =
 
     return safeUser as SafeUser;
   } catch (err) {
-    return handleDbCatchBlock(err);
+    throw err;
   }
 };
 
@@ -55,7 +54,7 @@ export const SelectUserModel = async (identifier: string | number): Promise<Safe
 
     return safeUser as SafeUser;
   } catch (err) {
-    return handleDbCatchBlock(err);
+    throw err;
   }
 };
 
@@ -73,7 +72,7 @@ export const SelectUnsafeUserModel = async (identifier: string | number): Promis
 
     return response.rows[0] as StoredUser;
   } catch (err) {
-    return handleDbCatchBlock(err);
+    throw err;
   }
 };
 
@@ -94,6 +93,6 @@ export const UpdateLoginModel = async (identifier: string | number): Promise<Saf
     delete safeUser.password;
     return safeUser as SafeUser;
   } catch (err) {
-    return handleDbCatchBlock(err);
+    throw err;
   }
 };
