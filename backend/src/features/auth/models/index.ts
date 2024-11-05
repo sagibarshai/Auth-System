@@ -1,5 +1,5 @@
 import { pgClient } from "../../../database/init";
-import { toHash } from "../../../utils/passwords";
+import { toHash } from "../../../utils/hashes";
 
 interface StoredUser {
   id: number;
@@ -48,6 +48,7 @@ const storedUserToReturnedStoredUser = (storedUser: StoredUser): SafeUser => {
 
 export const InsertUserModel = async (user: NewUserPayload): Promise<{ safeUser: SafeUser; verificationToken: StoredUser["verification_token"] }> => {
   try {
+    const randomToken = crypto.randomUUID();
     const response = await pgClient.query(
       `INSERT INTO Users 
         (first_name, last_name, email, password, phone_number, verification_token) 
@@ -55,12 +56,12 @@ export const InsertUserModel = async (user: NewUserPayload): Promise<{ safeUser:
          ($1, $2, $3, $4, $5, $6)
          RETURNING *
          `,
-      [user.firstName, user.lastName, user.email, user.password, user.phoneNumber, toHash(crypto.randomUUID())]
+      [user.firstName, user.lastName, user.email, user.password, user.phoneNumber, toHash(randomToken)]
     );
 
     const storedUser = response.rows[0] as StoredUser;
 
-    return { safeUser: storedUserToReturnedStoredUser(storedUser), verificationToken: storedUser.verification_token };
+    return { safeUser: storedUserToReturnedStoredUser(storedUser), verificationToken: randomToken };
   } catch (err) {
     throw err;
   }

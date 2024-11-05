@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { SelectUnsafeUserModel, UpdateLoginModel } from "../models";
 import { BadRequestError, ForbiddenError } from "../../../errors";
-import { compereHash } from "../../../utils/passwords";
+import { compereHash } from "../../../utils/hashes";
 import { createTokenAndSetCookie, deleteTokenCookie } from "../../../utils/jwt";
 
 interface SignUpRequest extends Request {

@@ -1,34 +1,43 @@
 import nodemailer from "nodemailer";
+import { config } from "../../config";
+import SMTPTransport from "nodemailer/lib/smtp-transport";
 
 interface VerifyEmailProperties {
   to: string;
   token: string;
   id: number;
+  subject?: string;
+  text?: string;
 }
-export const sendEmailVerification = (verifyEmailProperties: VerifyEmailProperties) => {
+export const sendEmailVerification = async ({
+  id,
+  to,
+  token,
+  subject = "Account verification",
+  text = "Verify your account here:",
+}: VerifyEmailProperties): Promise<SMTPTransport.SentMessageInfo | undefined> => {
   const mailOptions = {
-    from: process.env.EMAIL_ADDRESS,
-    to: verifyEmailProperties.to,
-    subject: "Account verification",
-    text: `Verify your account here: http://localhost:4000/api/auth/emailVerification/${verifyEmailProperties.id}/${encodeURIComponent(
-      verifyEmailProperties.token
-    )}
-      `,
+    from: config.MAIL.FROM,
+    to: to,
+    subject: subject,
+    text: text + `${config.BASE_URL}:${config.PORT}/api/auth/emailVerification/${id}/${encodeURIComponent(token)}`,
   };
 
   const transporter = nodemailer.createTransport({
-    service: "Gmail",
-    host: "smtp.gmail.com",
-    port: 465,
-    secure: true,
+    service: config.MAIL.SERVICE,
+    host: config.MAIL.HOST,
+    port: config.MAIL.PORT,
+    secure: config.MAIL.SECURE,
     auth: {
-      user: process.env.EMAIL_ADDRESS,
-      pass: process.env.EMAIL_ACCESS_KEY,
+      user: config.MAIL.AUTH.USER,
+      pass: config.MAIL.AUTH.PASS,
     },
   });
 
+  let mailResponse: SMTPTransport.SentMessageInfo | undefined;
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) throw error;
-    return info;
+    mailResponse = info;
   });
+  return mailResponse;
 };
