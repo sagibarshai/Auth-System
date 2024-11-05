@@ -6,5 +6,4 @@ import { SignOutRouter } from "./sign-out/route";
 const router = Router();
 
 router.use("/auth", signUpRouter, SignInRouter, SignOutRouter);
-
 export { router as authRoutes };
