@@ -1,4 +1,4 @@
 export const config = {
   PORT: 4000,
-  PROD: false,
+  PROD: Boolean(process.env.NODE_ENV),
 };
