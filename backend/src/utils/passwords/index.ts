@@ -6,7 +6,7 @@ export const toHash = (password: string): string => {
   return hash;
 };
 
-export const compereHash = (storedPassword: string, suppliedPassword: string): boolean => {
-  const isEqual = bcrypt.compareSync(suppliedPassword, storedPassword);
+export const compereHash = (hashed: string, notHashed: string): boolean => {
+  const isEqual = bcrypt.compareSync(notHashed, hashed);
   return isEqual;
 };

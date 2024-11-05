@@ -18,6 +18,12 @@ if (!process.env.JWT_KEY) {
 if (!process.env.COOKIE_SECRET) {
   throw new Error("COOKIE_SECRET must be define");
 }
+if (!process.env.EMAIL_ADDRESS) {
+  throw new Error("EMAIL_ADDRESS must be define");
+}
+if (!process.env.EMAIL_ACCESS_KEY) {
+  throw new Error("EMAIL_ACCESS_KEY must be define");
+}
 
 app.use(bodyParser.json());
 

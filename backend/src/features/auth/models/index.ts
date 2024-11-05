@@ -1,6 +1,8 @@
 import { pgClient } from "../../../database/init";
+import { toHash } from "../../../utils/passwords";
 
 interface StoredUser {
+  id: number;
   first_name: string;
   last_name: string;
   email: string;
@@ -9,10 +11,12 @@ interface StoredUser {
   updated_at: Date;
   last_login: Date;
   is_verified: boolean;
+  verification_token: string;
   phone_number?: string;
 }
 
 export interface ReturnedStoredUser {
+  id: number;
   firstName: string;
   lastName: string;
   email: string;
@@ -22,13 +26,15 @@ export interface ReturnedStoredUser {
   updateAt: Date;
   lastLogin: Date;
   isVerified: boolean;
+  verificationToken: string;
 }
-export interface SafeUser extends Omit<ReturnedStoredUser, "password"> {}
+export interface SafeUser extends Omit<ReturnedStoredUser, "password" | "verificationToken"> {}
 
 export interface NewUserPayload extends Omit<ReturnedStoredUser, "registerAt" | "updateAt" | "isVerified" | "lastLogin"> {}
 
 const storedUserToReturnedStoredUser = (storedUser: StoredUser): SafeUser => {
   return {
+    id: storedUser.id,
     firstName: storedUser.first_name,
     lastName: storedUser.last_name,
     email: storedUser.email,
@@ -40,21 +46,21 @@ const storedUserToReturnedStoredUser = (storedUser: StoredUser): SafeUser => {
   };
 };
 
-export const InsertUserModel = async (user: NewUserPayload): Promise<SafeUser> => {
+export const InsertUserModel = async (user: NewUserPayload): Promise<{ safeUser: SafeUser; verificationToken: StoredUser["verification_token"] }> => {
   try {
     const response = await pgClient.query(
       `INSERT INTO Users 
-        (first_name, last_name, email, password, phone_number) 
+        (first_name, last_name, email, password, phone_number, verification_token) 
         VALUES
-         ($1, $2, $3, $4, $5)
+         ($1, $2, $3, $4, $5, $6)
          RETURNING *
          `,
-      [user.firstName, user.lastName, user.email, user.password, user.phoneNumber]
+      [user.firstName, user.lastName, user.email, user.password, user.phoneNumber, toHash(crypto.randomUUID())]
     );
 
     const storedUser = response.rows[0] as StoredUser;
 
-    return storedUserToReturnedStoredUser(storedUser);
+    return { safeUser: storedUserToReturnedStoredUser(storedUser), verificationToken: storedUser.verification_token };
   } catch (err) {
     throw err;
   }
@@ -92,8 +98,7 @@ export const SelectUnsafeUserModel = async (identifier: string | number): Promis
     if (!response.rows.length) return;
 
     const storedUser = response.rows[0] as StoredUser;
-
-    return { ...storedUserToReturnedStoredUser(storedUser), password: storedUser.password };
+    return { ...storedUserToReturnedStoredUser(storedUser), password: storedUser.password, verificationToken: storedUser.verification_token };
   } catch (err) {
     throw err;
   }
@@ -109,6 +114,26 @@ export const UpdateLoginModel = async (identifier: string | number): Promise<Saf
        WHERE ${field} = $2
        RETURNING *;`,
       [new Date(), identifier]
+    );
+
+    if (!response.rows.length) throw new Error(`User with ${field} : ${identifier} not found `);
+    const storedUser = response.rows[0] as StoredUser;
+
+    return storedUserToReturnedStoredUser(storedUser);
+  } catch (err) {
+    throw err;
+  }
+};
+export const UpdateIsVerifyModel = async (identifier: string | number): Promise<SafeUser> => {
+  const field = typeof identifier === "number" ? "id" : "email";
+
+  try {
+    const response = await pgClient.query(
+      `UPDATE Users  
+       SET is_verified = $1
+       WHERE ${field} = $2
+       RETURNING *;`,
+      [true, identifier]
     );
 
     if (!response.rows.length) throw new Error(`User with ${field} : ${identifier} not found `);
