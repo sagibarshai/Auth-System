@@ -63,7 +63,6 @@ export const InsertUserModel = async (user: NewUserPayload): Promise<SafeUser> =
 export const SelectUserModel = async (identifier: string | number): Promise<SafeUser | undefined> => {
   /** if identifier is number field = id, else field = email*/
   const field = typeof identifier === "number" ? "id" : "email";
-  console.log(`filed is ${field} and identifier is ${identifier}`);
   try {
     const response = await pgClient.query(
       `SELECT * FROM Users  

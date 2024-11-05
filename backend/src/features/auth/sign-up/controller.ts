@@ -15,10 +15,9 @@ export const signUpController = async (req: SignUpRequest, res: Response, next: 
     const isUserExists = await SelectUserModel(req.body.email);
     if (isUserExists) {
       deleteTokenCookie(req);
-      throw BadRequestError([{ message: `User with email ${req.body.email} already exists`, field: "email" }]);
+      return next(BadRequestError([{ message: `User with email ${req.body.email} already exists`, field: "email" }]));
     }
     const newUser = await InsertUserModel({ ...req.body, password: hashedPassword });
-
     createTokenAndSetCookie(newUser, req);
 
     res.status(201).send(newUser);

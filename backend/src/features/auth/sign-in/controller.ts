@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { SelectUnsafeUserModel, UpdateLoginModel } from "../models";
-import { BadRequestError } from "../../../errors";
+import { BadRequestError, ForbiddenError } from "../../../errors";
 import { compereHash } from "../../../utils/passwords";
 import { createTokenAndSetCookie, deleteTokenCookie } from "../../../utils/jwt";
 
@@ -14,19 +14,18 @@ interface SignUpRequest extends Request {
 export const signInController = async (req: SignUpRequest, res: Response, next: NextFunction) => {
   try {
     const storedUser = await SelectUnsafeUserModel(req.body.email);
-    if (!storedUser) next(BadRequestError([{ message: "Wrong Credentials" }]));
-    else {
-      const isPasswordsMatch = compereHash(storedUser.password, req.body.password);
-      if (!isPasswordsMatch) {
-        deleteTokenCookie(req);
-        next(BadRequestError([{ message: "Wrong Credentials" }]));
-      } else {
-        const safeUser = await UpdateLoginModel(req.body.email);
-        createTokenAndSetCookie(safeUser, req);
+    if (!storedUser) return next(BadRequestError([{ message: "Wrong Credentials" }]));
+    if (!storedUser.isVerified) return next(ForbiddenError([{ message: "Email not verify, please check user email" }]));
 
-        res.status(200).send(safeUser);
-      }
+    const isPasswordsMatch = compereHash(storedUser.password, req.body.password);
+    if (!isPasswordsMatch) {
+      deleteTokenCookie(req);
+      return next(BadRequestError([{ message: "Wrong Credentials" }]));
     }
+    const safeUser = await UpdateLoginModel(req.body.email);
+    createTokenAndSetCookie(safeUser, req);
+
+    res.status(200).send(safeUser);
   } catch (err) {
     next(err);
   }
