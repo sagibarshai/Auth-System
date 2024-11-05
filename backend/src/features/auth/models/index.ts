@@ -1,20 +1,44 @@
 import { pgClient } from "../../../database/init";
 
-export interface StoredUser {
+interface StoredUser {
+  first_name: string;
+  last_name: string;
+  email: string;
+  password: string;
+  register_at: Date;
+  updated_at: Date;
+  last_login: Date;
+  is_verified: boolean;
+  phone_number?: string;
+}
+
+export interface ReturnedStoredUser {
   firstName: string;
   lastName: string;
   email: string;
   password: string;
+  phoneNumber?: string;
   registerAt: Date;
   updateAt: Date;
-  last_login: Date;
+  lastLogin: Date;
   isVerified: boolean;
-  phoneNumber?: string;
 }
+export interface SafeUser extends Omit<ReturnedStoredUser, "password"> {}
 
-export interface NewUserPayload extends Omit<StoredUser, "registerAt" | "updateAt" | "isVerified" | "last_login"> {}
+export interface NewUserPayload extends Omit<ReturnedStoredUser, "registerAt" | "updateAt" | "isVerified" | "lastLogin"> {}
 
-export interface SafeUser extends Omit<StoredUser, "password"> {}
+const storedUserToReturnedStoredUser = (storedUser: StoredUser): SafeUser => {
+  return {
+    firstName: storedUser.first_name,
+    lastName: storedUser.last_name,
+    email: storedUser.email,
+    isVerified: storedUser.is_verified,
+    lastLogin: storedUser.last_login,
+    registerAt: storedUser.register_at,
+    updateAt: storedUser.updated_at,
+    phoneNumber: storedUser.phone_number,
+  };
+};
 
 export const InsertUserModel = async (user: NewUserPayload): Promise<SafeUser> => {
   try {
@@ -28,10 +52,9 @@ export const InsertUserModel = async (user: NewUserPayload): Promise<SafeUser> =
       [user.firstName, user.lastName, user.email, user.password, user.phoneNumber]
     );
 
-    const safeUser = response.rows[0];
-    delete safeUser.password;
+    const storedUser = response.rows[0] as StoredUser;
 
-    return safeUser as SafeUser;
+    return storedUserToReturnedStoredUser(storedUser);
   } catch (err) {
     throw err;
   }
@@ -49,16 +72,15 @@ export const SelectUserModel = async (identifier: string | number): Promise<Safe
     );
     if (!response.rows.length) return;
 
-    const safeUser = response.rows[0];
-    delete safeUser.password;
+    const storedUser = response.rows[0] as StoredUser;
 
-    return safeUser as SafeUser;
+    return storedUserToReturnedStoredUser(storedUser);
   } catch (err) {
     throw err;
   }
 };
 
-export const SelectUnsafeUserModel = async (identifier: string | number): Promise<StoredUser | undefined> => {
+export const SelectUnsafeUserModel = async (identifier: string | number): Promise<ReturnedStoredUser | undefined> => {
   /** if identifier is number field = id, else field = email*/
   const field = typeof identifier === "number" ? "id" : "email";
 
@@ -70,7 +92,9 @@ export const SelectUnsafeUserModel = async (identifier: string | number): Promis
     );
     if (!response.rows.length) return;
 
-    return response.rows[0] as StoredUser;
+    const storedUser = response.rows[0] as StoredUser;
+
+    return { ...storedUserToReturnedStoredUser(storedUser), password: storedUser.password };
   } catch (err) {
     throw err;
   }
@@ -89,9 +113,9 @@ export const UpdateLoginModel = async (identifier: string | number): Promise<Saf
     );
 
     if (!response.rows.length) throw new Error(`User with ${field} : ${identifier} not found `);
-    const safeUser = response.rows[0];
-    delete safeUser.password;
-    return safeUser as SafeUser;
+    const storedUser = response.rows[0] as StoredUser;
+
+    return storedUserToReturnedStoredUser(storedUser);
   } catch (err) {
     throw err;
   }
