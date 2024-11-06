@@ -1,18 +1,20 @@
-import express, { Response } from "express";
-import { config } from "./config";
-import bodyParser from "body-parser";
-
+import helmet from "helmet";
+import express from "express";
 import cookieSession from "cookie-session";
+import { json } from "body-parser";
+import "dotenv/config";
 
+import { config } from "./config";
 import { errorMiddleware } from "./middlewares/errors";
 import { notfoundMiddleware } from "./middlewares/errors/not-found";
 import { authRoutes } from "./features/auth";
 import { pgClient } from "./database/init";
-import "dotenv/config";
 
 const app = express();
 
-app.use(bodyParser.json());
+app.use(json());
+
+app.use(helmet());
 
 app.use(
   cookieSession({
@@ -23,12 +25,6 @@ app.use(
     httpOnly: true,
   })
 );
-
-// health check
-app.get("/", (_, res: Response) => {
-  res.status(200).send("Ok");
-});
-//
 
 app.use("/api", authRoutes);
 

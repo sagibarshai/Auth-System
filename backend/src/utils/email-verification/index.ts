@@ -1,6 +1,7 @@
 import nodemailer from "nodemailer";
-import { config } from "../../config";
 import SMTPTransport from "nodemailer/lib/smtp-transport";
+
+import { config } from "../../config";
 
 interface VerifyEmailProperties {
   to: string;
@@ -20,7 +21,7 @@ export const sendEmailVerification = async ({
     from: config.MAIL.FROM,
     to: to,
     subject: subject,
-    text: text + `${config.BASE_URL}:${config.PORT}/api/auth/emailVerification/${id}/${encodeURIComponent(token)}`,
+    text: `${text} ${config.BASE_URL}:${config.PORT}/api/auth/emailVerification/${id}/${encodeURIComponent(token)}`,
   };
 
   const transporter = nodemailer.createTransport({

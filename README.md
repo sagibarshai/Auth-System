@@ -93,7 +93,6 @@ Extensibility:
 
 ---
 ---
----
 
 Getting Started:
 Prerequisites

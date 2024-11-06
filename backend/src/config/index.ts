@@ -12,7 +12,6 @@ if (!process.env.EMAIL_ACCESS_KEY) {
 if (!process.env.EMAIL_ADDRESS) {
   throw new Error("EMAIL_ADDRESS must be define");
 }
-
 if (!process.env.POSTGRES_USER) {
   throw new Error("POSTGRES_USER must be define");
 }
