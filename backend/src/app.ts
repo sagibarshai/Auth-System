@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { Response } from "express";
 import { config } from "./config";
 import bodyParser from "body-parser";
 
@@ -12,19 +12,6 @@ import "dotenv/config";
 
 const app = express();
 
-if (!process.env.JWT_KEY) {
-  throw new Error("PASSWORD_SALT must be define");
-}
-if (!process.env.COOKIE_SECRET) {
-  throw new Error("COOKIE_SECRET must be define");
-}
-if (!process.env.EMAIL_ADDRESS) {
-  throw new Error("EMAIL_ADDRESS must be define");
-}
-if (!process.env.EMAIL_ACCESS_KEY) {
-  throw new Error("EMAIL_ACCESS_KEY must be define");
-}
-
 app.use(bodyParser.json());
 
 app.use(
@@ -37,8 +24,8 @@ app.use(
 );
 
 // health check
-app.get("/", (req: Request, res: Response) => {
-  res.status(200).send("HI");
+app.get("/", (_, res: Response) => {
+  res.status(200).send("Ok");
 });
 //
 
@@ -51,7 +38,7 @@ app.use(errorMiddleware);
 const startUp = async () => {
   try {
     await pgClient.connect();
-    console.log("Listen on port 4000");
+    console.log(`Listen on port ${config.PORT}`);
   } catch (err) {
     console.log("Database connection error ", err);
     process.exit(0);
