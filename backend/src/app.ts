@@ -20,6 +20,7 @@ app.use(
     secure: config.PROD ? true : false,
     maxAge: 1 * 60 * 60 * 1000, // 1 hour
     signed: false, // not encrypt the cookie
+    httpOnly: true,
   })
 );
 

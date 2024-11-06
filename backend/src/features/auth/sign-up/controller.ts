@@ -19,7 +19,7 @@ export const signUpController = async (req: SignUpRequest, res: Response, next: 
     }
     const { safeUser, verificationToken } = await InsertUserModel({ ...req.body, password: hashedPassword });
 
-    createTokenAndSetCookie(safeUser, req);
+    // createTokenAndSetCookie(safeUser, req);
     sendEmailVerification({ id: safeUser.id, to: safeUser.email, token: verificationToken });
 
     res.status(201).send(safeUser);

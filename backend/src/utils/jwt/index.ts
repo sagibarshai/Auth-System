@@ -9,13 +9,12 @@ export const createTokenAndSetCookie = (payload: SafeUser, req: Request): string
 };
 
 export const verifyToken = (token: string): SafeUser | undefined => {
-  let safeUser: undefined | SafeUser;
-
-  jwt.verify(token, process.env.JWT_KEY!, (err, payload) => {
-    if (err) return;
-    safeUser = payload as SafeUser;
-  });
-  return safeUser;
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_KEY!) as SafeUser;
+    return decoded;
+  } catch (err) {
+    throw err;
+  }
 };
 
 export const setTokenCookie = (req: Request, token: string) => {
