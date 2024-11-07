@@ -16,11 +16,13 @@ app.use(json());
 
 app.use(helmet());
 
+console.log(config.COOKIES.EXPIRED_IN);
+
 app.use(
   cookieSession({
     keys: [process.env.COOKIE_SECRET!],
     secure: config.PROD ? true : false,
-    maxAge: 1 * 60 * 60 * 1000, // 1 hour
+    maxAge: config.COOKIES.EXPIRED_IN, // 1 hour
     signed: false, // not encrypt the cookie
     httpOnly: true,
   })

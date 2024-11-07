@@ -1,1 +1,1 @@
-export const formattedPhoneRegex = /^\+9725\d{8}$/;
+export const formattedPhoneRegex = /^\+\d{12}$/;

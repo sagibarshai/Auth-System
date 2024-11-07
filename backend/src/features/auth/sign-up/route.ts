@@ -16,11 +16,7 @@ router.post(
     .withMessage("Password should contain at least 1 symbol, 1 uppercase, 1 lowercase, 1 number")
     .isLength({ min: 6, max: 30 })
     .withMessage("Password should be exist with 6 - 30 characters"),
-  body("phoneNumber")
-    .matches(formattedPhoneRegex)
-    .withMessage("Phone number must be in this structure : +9725XXXXXXXX")
-    .isMobilePhone(["he-IL"], { strictMode: true })
-    .withMessage("Phone number must be valid and from Israel"),
+  body("phoneNumber").matches(formattedPhoneRegex).withMessage("Phone number must be in this structure : +YYYYXXXXXXXX"),
   requestValidationMiddleware,
   signUpController
 );
