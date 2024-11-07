@@ -1,3 +1,7 @@
+** 
+Auth-System
+**
+
 A robust and scalable Node (Express) backend application with a full authentication flow, error handling, and modular structure for easy extension.
 This project is designed with a focus on maintainability, type safety with TypeScript, and quick environment setup with Docker Compose.
 
@@ -104,10 +108,12 @@ git
 Setup
 1. Clone the repository:
 
-git clone https://github.com/sagibarshai/express-template-auth-and-errors-handling.git
-cd express-template-auth-and-errors-handling
+git clone https://github.com/sagibarshai/Auth-System.git
+
+cd Auth-System
 
 2. Set up the environment variables by creating a .env file:
+
 PORT=
 JWT_KEY=
 COOKIE_SECRET=
