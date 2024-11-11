@@ -11,7 +11,6 @@ Authentication:
 Includes the full authentication flow:
 
 - Signup: Users can sign up with their email and password.
-- Email Verification: Users must verify their email before logging in.
 - Signin: Users can log in with their credentials.
 - Signout: Users can log out, which destroys the authentication token.
 
@@ -19,7 +18,6 @@ Includes the full authentication flow:
 
 Security:
 - Passwords are securely hashed using bcrypt before storing them in the database.
-- Email verification is required before login is allowed, preventing unauthorized access.
 - Cookie-based JWT:
 The authentication token is stored in a secure cookie, ensuring a stateless session while preventing common security issues such as CSRF attacks.
 The token is set on successful login and is used for verifying the user's identity on subsequent requests.
@@ -29,11 +27,11 @@ The token is set on successful login and is used for verifying the user's identi
 Database Integration:
 
 - Users are stored and updated in a PostgreSQL database.
-The user data (including email, hashed password, and verification status) is saved during signup.
+The user data (including email, hashed password) is saved during signup.
 
-- User updates (e.g., update date of last login or verifying the email) are reflected in the database.
+- User updates (e.g., update date of last login) are reflected in the database.
 
-- Login, the system checks the credentials against the database, and the email is verify flag.- 
+- Login, the system checks the credentials against the database.
 
 ---
 

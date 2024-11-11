@@ -3,7 +3,6 @@ import { NewUserPayload, InsertUserModel, SelectUserModel } from "../models";
 import { BadRequestError } from "../../../errors";
 import { toHash } from "../../../utils/hashes";
 import { createTokenAndSetCookie, deleteTokenCookie } from "../../../utils/jwt";
-import { sendEmailVerification } from "../../../utils/email-verification";
 
 interface SignUpRequest extends Request {
   body: NewUserPayload;
@@ -17,9 +16,9 @@ export const signUpController = async (req: SignUpRequest, res: Response, next: 
       deleteTokenCookie(req);
       return next(BadRequestError([{ message: `User with email ${req.body.email} already exists`, field: "email" }]));
     }
-    const { safeUser, verificationToken } = await InsertUserModel({ ...req.body, password: hashedPassword });
+    const safeUser = await InsertUserModel({ ...req.body, password: hashedPassword });
 
-    sendEmailVerification({ id: safeUser.id, to: safeUser.email, token: verificationToken });
+    createTokenAndSetCookie(safeUser, req);
 
     res.status(201).send(safeUser);
   } catch (err) {

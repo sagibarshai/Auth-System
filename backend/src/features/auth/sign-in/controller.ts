@@ -15,7 +15,6 @@ export const signInController = async (req: SignUpRequest, res: Response, next: 
   try {
     const storedUser = await SelectUnsafeUserModel(req.body.email);
     if (!storedUser) return next(BadRequestError([{ message: "Wrong Credentials" }]));
-    if (!storedUser.isVerified) return next(ForbiddenError([{ message: "Email not verify, please check user email" }]));
 
     const isPasswordsMatch = compereHash(storedUser.password, req.body.password);
     if (!isPasswordsMatch) {
@@ -23,6 +22,7 @@ export const signInController = async (req: SignUpRequest, res: Response, next: 
       return next(BadRequestError([{ message: "Wrong Credentials" }]));
     }
     const safeUser = await UpdateLoginModel(req.body.email);
+
     createTokenAndSetCookie(safeUser, req);
 
     res.status(200).send(safeUser);

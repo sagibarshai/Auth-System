@@ -6,12 +6,7 @@ if (!process.env.JWT_KEY) {
 if (!process.env.COOKIE_SECRET) {
   throw new Error("COOKIE_SECRET must be define inside .env file");
 }
-if (!process.env.EMAIL_ACCESS_KEY) {
-  throw new Error("EMAIL_ACCESS_KEY must be define inside .env file");
-}
-if (!process.env.EMAIL_ADDRESS) {
-  throw new Error("EMAIL_ADDRESS must be define inside .env file");
-}
+
 if (!process.env.POSTGRES_USER) {
   throw new Error("POSTGRES_USER must be define inside .env file");
 }
@@ -46,17 +41,6 @@ export const config = {
   },
   COOKIES: {
     EXPIRED_IN: Number(process.env.COOKIES_EXPIRED_IN) || 3600 * 1000, // In milliseconds (Is redemanded to set this value as JWT.EXPIRED_IN * 1000 )
-  },
-  MAIL: {
-    FROM: "noreply@emailverifyee.com",
-    SERVICE: "Gmail",
-    HOST: "smtp.gmail.com",
-    SECURE: true,
-    PORT: 465,
-    AUTH: {
-      USER: process.env.EMAIL_ADDRESS,
-      PASS: process.env.EMAIL_ACCESS_KEY,
-    },
   },
   POSTGRES: {
     USER: process.env.POSTGRES_USER,

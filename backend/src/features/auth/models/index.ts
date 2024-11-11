@@ -1,5 +1,4 @@
 import { pgClient } from "../../../database/init";
-import { toHash } from "../../../utils/hashes";
 
 interface StoredUser {
   id: number;
@@ -10,8 +9,6 @@ interface StoredUser {
   register_at: Date;
   updated_at: Date;
   last_login: Date;
-  is_verified: boolean;
-  verification_token: string;
   phone_number?: string;
 }
 
@@ -25,12 +22,10 @@ export interface ReturnedStoredUser {
   registerAt: Date;
   updateAt: Date;
   lastLogin: Date;
-  isVerified: boolean;
-  verificationToken: string;
 }
-export interface SafeUser extends Omit<ReturnedStoredUser, "password" | "verificationToken"> {}
+export interface SafeUser extends Omit<ReturnedStoredUser, "password"> {}
 
-export interface NewUserPayload extends Omit<ReturnedStoredUser, "registerAt" | "updateAt" | "isVerified" | "lastLogin"> {}
+export interface NewUserPayload extends Omit<ReturnedStoredUser, "registerAt" | "updateAt" | "lastLogin"> {}
 
 const storedUserToReturnedStoredUser = (storedUser: StoredUser): SafeUser => {
   return {
@@ -38,7 +33,6 @@ const storedUserToReturnedStoredUser = (storedUser: StoredUser): SafeUser => {
     firstName: storedUser.first_name,
     lastName: storedUser.last_name,
     email: storedUser.email,
-    isVerified: storedUser.is_verified,
     lastLogin: storedUser.last_login,
     registerAt: storedUser.register_at,
     updateAt: storedUser.updated_at,
@@ -46,22 +40,21 @@ const storedUserToReturnedStoredUser = (storedUser: StoredUser): SafeUser => {
   };
 };
 
-export const InsertUserModel = async (user: NewUserPayload): Promise<{ safeUser: SafeUser; verificationToken: StoredUser["verification_token"] }> => {
+export const InsertUserModel = async (user: NewUserPayload): Promise<SafeUser> => {
   try {
-    const randomToken = crypto.randomUUID();
     const response = await pgClient.query(
       `INSERT INTO Users 
-        (first_name, last_name, email, password, phone_number, verification_token) 
+        (first_name, last_name, email, password, phone_number) 
         VALUES
-         ($1, $2, $3, $4, $5, $6)
+         ($1, $2, $3, $4, $5)
          RETURNING *
          `,
-      [user.firstName, user.lastName, user.email, user.password, user.phoneNumber, toHash(randomToken)]
+      [user.firstName, user.lastName, user.email, user.password, user.phoneNumber]
     );
 
     const storedUser = response.rows[0] as StoredUser;
 
-    return { safeUser: storedUserToReturnedStoredUser(storedUser), verificationToken: randomToken };
+    return storedUserToReturnedStoredUser(storedUser);
   } catch (err) {
     throw err;
   }
@@ -99,7 +92,7 @@ export const SelectUnsafeUserModel = async (identifier: string | number): Promis
     if (!response.rows.length) return;
 
     const storedUser = response.rows[0] as StoredUser;
-    return { ...storedUserToReturnedStoredUser(storedUser), password: storedUser.password, verificationToken: storedUser.verification_token };
+    return { ...storedUserToReturnedStoredUser(storedUser), password: storedUser.password };
   } catch (err) {
     throw err;
   }
@@ -115,26 +108,6 @@ export const UpdateLoginModel = async (identifier: string | number): Promise<Saf
        WHERE ${field} = $2
        RETURNING *;`,
       [new Date(), identifier]
-    );
-
-    if (!response.rows.length) throw new Error(`User with ${field} : ${identifier} not found `);
-    const storedUser = response.rows[0] as StoredUser;
-
-    return storedUserToReturnedStoredUser(storedUser);
-  } catch (err) {
-    throw err;
-  }
-};
-export const UpdateIsVerifyModel = async (identifier: string | number): Promise<SafeUser> => {
-  const field = typeof identifier === "number" ? "id" : "email";
-
-  try {
-    const response = await pgClient.query(
-      `UPDATE Users  
-       SET is_verified = $1
-       WHERE ${field} = $2
-       RETURNING *;`,
-      [true, identifier]
     );
 
     if (!response.rows.length) throw new Error(`User with ${field} : ${identifier} not found `);
